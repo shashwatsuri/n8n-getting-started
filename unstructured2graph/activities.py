@@ -1,7 +1,7 @@
 import asyncio
 
 from temporalio import activity
-from shared import DocumentDetails,DocumentState,QueryDetails, QueryState, DOCUMENT_TASK_QUEUE, QUERY_TASK_QUEUE
+from shared import DocumentDetails,QueryDetails, DOCUMENT_TASK_QUEUE, QUERY_TASK_QUEUE
 
 @activity.defn
 async def process_document(document_details: DocumentDetails) -> str:

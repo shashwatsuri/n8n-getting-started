@@ -5,14 +5,15 @@ from temporalio import workflow
 
 with workflow.unsafe.imports_passed_through():
     from workflows import DocumentIngestion, QueryProcessing
-from activities import process_document, process_query
+    from activities import process_document, process_query
+    from shared import DOCUMENT_TASK_QUEUE, QUERY_TASK_QUEUE
 
 async def main():
     client = await Client.connect("localhost:7233")
     
     document_worker = Worker(
         client,
-        task_queue="my-task-queue",
+        task_queue=DOCUMENT_TASK_QUEUE,
         workflows=[DocumentIngestion],
         activities=[process_document],
     )
@@ -21,7 +22,7 @@ async def main():
 
     query_worker = Worker(
         client,
-        task_queue="my-task-queue",
+        task_queue=QUERY_TASK_QUEUE,
         workflows=[QueryProcessing],
         activities=[process_query],
     )

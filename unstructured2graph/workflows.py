@@ -6,16 +6,16 @@ from temporalio.exceptions import ActivityError
 
 with workflow.unsafe.imports_passed_through():
     from activities import process_document, process_query
-    from shared import DocumentDetails,DocumentState,QueryDetails,QueryState, DOCUMENT_TASK_QUEUE, QUERY_TASK_QUEUE
+    from shared import DocumentDetails,QueryDetails, DOCUMENT_TASK_QUEUE, QUERY_TASK_QUEUE
    
 
 @workflow.defn
 class DocumentIngestion:
     @workflow.run
-    async def run(self, file_details: DocumentDetails) -> str:
+    async def run(self, document_details: DocumentDetails) -> str:
         return await workflow.execute_activity(
             process_document,
-            file_details,
+            document_details,
             schedule_to_close_timeout=timedelta(seconds=10),
         )
 
