@@ -3,6 +3,7 @@
 *.env-n8n
 *.env-pg-langfuse
 *.env-pg-n8n
+*.env
 
 # MacOS
 .DS_Store
@@ -10,3 +11,15 @@
 # Data volumes
 .n8n
 .cache
+data
+__pycache__
+.log
+unstructured2graph/documents/*
+
+# UV Environments
+*.venv
+
+# logs and settings
+lightrag.log
+.vscode
+pgpass
