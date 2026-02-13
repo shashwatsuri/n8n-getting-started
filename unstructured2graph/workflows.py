@@ -5,29 +5,55 @@ from temporalio.common import RetryPolicy
 from temporalio.exceptions import ActivityError
 
 with workflow.unsafe.imports_passed_through():
-    from activities import process_document, process_query
-    from shared import DocumentDetails,QueryDetails, DOCUMENT_TASK_QUEUE, QUERY_TASK_QUEUE
+    from shared import DocumentDetails
    
 
 @workflow.defn
 class DocumentIngestion:
     @workflow.run
-    async def run(self, document_details: DocumentDetails) -> str:
-        return await workflow.execute_activity(
-            process_document,
-            document_details,
+    async def run(self, document_details: list[DocumentDetails]) -> str:
+        print(await workflow.execute_activity(
+            "clear_working_directory",
             schedule_to_close_timeout=timedelta(seconds=10),
-        )
+        ))
+        print(await workflow.execute_activity(
+            "clear_memgraph_db",
+            schedule_to_close_timeout=timedelta(seconds=10),
+        ))
+        print(await workflow.execute_activity(
+            "create_index",
+            args=["Chunk", "hash"],
+            schedule_to_close_timeout=timedelta(seconds=10),
+        ))
+        print(await workflow.execute_activity(
+            "initialize_lightrag",
+            schedule_to_close_timeout=timedelta(seconds=10)
+            ))
+        
+        sources = [doc.file_path for doc in document_details]
 
-@workflow.defn
-class QueryProcessing:
-    @workflow.run
-    async def run(self, query_details: QueryDetails) -> str:
-        return await workflow.execute_activity(
-            process_query,
-            query_details,
-            schedule_to_close_timeout=timedelta(seconds=10),
-        )
+        print(await workflow.execute_activity(
+            "unstructured_to_graph",
+            args=[sources, False, True], 
+            schedule_to_close_timeout=timedelta(seconds=1000)
+            ))
+        
+        print(await workflow.execute_activity(
+            "afinalize_lightrag",
+            schedule_to_close_timeout=timedelta(seconds=10)
+            ))
+        document_names = ", ".join([doc.name for doc in document_details])
+        return f"Ingested documents: {document_names}"
+
+# @workflow.defn
+# class QueryProcessing:
+#     @workflow.run
+#     async def run(self, query_details: QueryDetails) -> str:
+#         return await workflow.execute_activity(
+#             process_query,
+#             query_details,
+#             schedule_to_close_timeout=timedelta(seconds=10),
+#         )
 
 
 # @workflow.defn

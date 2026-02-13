@@ -15,6 +15,8 @@ services:
     environment:
       - MEMGRAPH_USER=admin
       - MEMGRAPH_PASSWORD=adminpassword
+    volumes:
+      - memgraph_data:/var/lib/memgraph
 
   lab:
     image: memgraph/lab:latest
@@ -26,3 +28,6 @@ services:
     environment:
       - QUICK_CONNECT_MG_HOST=memgraph-mage
       - QUICK_CONNECT_MG_PORT=7687
+
+volumes:
+  memgraph_data:

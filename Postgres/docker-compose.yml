@@ -11,7 +11,7 @@ services:
       - pg-n8n
 
   pg-n8n:
-    image: pgautoupgrade/pgautoupgrade:latest
+    image: pgvector/pgvector:pg16
     restart: always
     ports:
       - "5432:5432"
