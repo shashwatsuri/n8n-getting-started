@@ -27,14 +27,5 @@ async def main():
     print("Worker started.")
     await document_worker.run()
 
-    # query_worker = Worker(
-    #     client,
-    #     task_queue=QUERY_TASK_QUEUE,
-    #     workflows=[QueryProcessing],
-    #     activities=[process_query],
-    # )
-    # print("Worker started.")
-    # await query_worker.run()
-
 if __name__ == "__main__":
     asyncio.run(main())

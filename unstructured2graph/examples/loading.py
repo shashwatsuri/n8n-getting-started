@@ -54,4 +54,4 @@ async def from_unstructured_with_prep(sources: list[str] = SOURCES.MEMGRAPH_DOCS
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(from_unstructured_with_prep(["/Users/bitovi/Repos/n8n-getting-started/unstructured2graph/documents/Static IP address Feature request-v2.pdf"]))
+    asyncio.run(from_unstructured_with_prep(["unstructured2graph/documents/NSA_Combo_Testing_Functionality_v000_0_1 (1).pdf","/Users/bitovi/Repos/n8n-getting-started/unstructured2graph/documents/Testing_Functionality_v000_0_2 (1).pdf"]))

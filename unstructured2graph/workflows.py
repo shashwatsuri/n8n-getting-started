@@ -10,6 +10,11 @@ with workflow.unsafe.imports_passed_through():
 
 @workflow.defn
 class DocumentIngestion:
+    retry_policy = RetryPolicy(
+        maximum_attempts=3,
+        maximum_interval=timedelta(seconds=10),
+        non_retryable_error_types=["FileNotFoundError", "PermissionError"],
+    )
     @workflow.run
     async def run(self, document_details: list[DocumentDetails]) -> str:
         print(await workflow.execute_activity(
@@ -35,73 +40,14 @@ class DocumentIngestion:
         print(await workflow.execute_activity(
             "unstructured_to_graph",
             args=[sources, False, True], 
-            schedule_to_close_timeout=timedelta(seconds=1000)
+            schedule_to_close_timeout=timedelta(seconds=100000),
+            retry_policy=self.retry_policy
             ))
         
         print(await workflow.execute_activity(
             "afinalize_lightrag",
-            schedule_to_close_timeout=timedelta(seconds=10)
+            schedule_to_close_timeout=timedelta(seconds=1000)
             ))
         document_names = ", ".join([doc.name for doc in document_details])
         return f"Ingested documents: {document_names}"
 
-# @workflow.defn
-# class QueryProcessing:
-#     @workflow.run
-#     async def run(self, query_details: QueryDetails) -> str:
-#         return await workflow.execute_activity(
-#             process_query,
-#             query_details,
-#             schedule_to_close_timeout=timedelta(seconds=10),
-#         )
-
-
-# @workflow.defn
-# class MoneyTransfer:
-#     @workflow.run
-#     async def run(self, payment_details: PaymentDetails) -> str:
-#         retry_policy = RetryPolicy(
-#             maximum_attempts=3,
-#             maximum_interval=timedelta(seconds=2),
-#             non_retryable_error_types=["InvalidAccountError", "InsufficientFundsError"],
-#         )
-
-#         # Withdraw money
-#         withdraw_output = await workflow.execute_activity_method(
-#             BankingActivities.withdraw,
-#             payment_details,
-#             start_to_close_timeout=timedelta(seconds=5),
-#             retry_policy=retry_policy,
-#         )
-
-#         # Deposit money
-#         try:
-#             deposit_output = await workflow.execute_activity_method(
-#                 BankingActivities.deposit,
-#                 payment_details,
-#                 start_to_close_timeout=timedelta(seconds=5),
-#                 retry_policy=retry_policy,
-#             )
-
-#             result = f"Transfer complete (transaction IDs: {withdraw_output}, {deposit_output})"
-#             return result
-#         except ActivityError as deposit_err:
-#             # Handle deposit error
-#             workflow.logger.error(f"Deposit failed: {deposit_err}")
-#             # Attempt to refund
-#             try:
-#                 refund_output = await workflow.execute_activity_method(
-#                     BankingActivities.refund,
-#                     payment_details,
-#                     start_to_close_timeout=timedelta(seconds=5),
-#                     retry_policy=retry_policy,
-#                 )
-#                 workflow.logger.info(
-#                     f"Refund successful. Confirmation ID: {refund_output}"
-#                 )
-#             except ActivityError as refund_error:
-#                 workflow.logger.error(f"Refund failed: {refund_error}")
-#                 raise refund_error from deposit_err
-
-#             # Re-raise deposit error if refund was successful
-#             raise deposit_err
